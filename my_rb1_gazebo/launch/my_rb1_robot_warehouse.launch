@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<launch>
+
+	<!-- roslaunch arguments --> 
+	<arg name="debug" default="false"/>
+	<arg name="world_name" default="$(find rb1_base_gazebo)/worlds/ros2_online_workshop.world"/>
+
+	<!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+		<arg name="world_name" value="$(arg world_name)"/>
+		<arg name="debug" value="$(arg debug)" />
+		<arg name="paused" value="false"/>
+		<arg name="use_sim_time" value="true"/>
+		<arg name="headless" value="false"/>
+		<arg name="verbose" value="true"/>
+	</include>
+	
+    <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find my_rb1_description)/urdf/my_rb1_robot.urdf'" />
+   
+    <arg name="model_name" default="my_rb1_robot"/>
+    <arg name="x" default="-0.4"/>
+    <arg name="y" default="-1.33"/>
+    <arg name="z" default="0.06"/>
+    
+    <node name="myrb1_spawn" pkg="gazebo_ros" type="spawn_model" output="screen"
+          args="-urdf -param robot_description -model $(arg model_name) -x $(arg x) -y $(arg y) -z $(arg z)" />
+
+    <!-- send fake joint values -->
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+
+    <!-- Combine joint values -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+</launch>
